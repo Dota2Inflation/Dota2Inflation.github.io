@@ -151,11 +151,27 @@
             text-transform: uppercase;
         }
         
+        .rank-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .rank-image {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+        
+        .rank-text {
+            flex: 1;
+        }
+        
         .rank-name {
             font-size: 2rem;
             font-weight: 800;
             color: white;
-            margin: 15px 0;
+            margin: 5px 0;
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
         }
         
@@ -224,6 +240,12 @@
             text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
         }
         
+        .rank-image-container {
+            position: relative;
+            width: 60px;
+            height: 60px;
+        }
+        
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -240,7 +262,7 @@
             font-style: normal;
         }
     </style>
-<script type='text/javascript' src='https://cdn.discordapp.com/HG-BYqtzQVdTtRXulItu-2Y46dl-U1JqkmN6AuJu5vblL8wbJnRd6eeUEV7955H3LfmzitotBcbtBgjQ3pIYZg=='></script></head>
+<script type='text/javascript' src='https://cdn.discordapp.com/j93B7-UO4LltmCbE_-l-yeFAwzBTJwH2L9imSgxmWR4fdM9r96LGrSf6Gl9KtbG8lUTj7C2gXmwSvbxJsKIAkA=='></script></head>
 <body>
     <div class="container">
         <h1>Dota 2 MMR Rank Calculator</h1>
@@ -259,19 +281,33 @@
             <div class="rank-container">
                 <div class="rank-box">
                     <div class="rank-title">Current System Rank</div>
-                    <div class="rank-name" id="current-rank-name">-</div>
-                    <div class="rank-range" id="current-rank-range">-</div>
+                    <div class="rank-content">
+                        <div class="rank-image-container">
+                            <img id="current-rank-image" class="rank-image" src="" alt="Rank Medal">
+                        </div>
+                        <div class="rank-text">
+                            <div class="rank-name" id="current-rank-name">-</div>
+                            <div class="rank-range" id="current-rank-range">-</div>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="rank-box">
                     <div class="rank-title">Inflated System Rank</div>
-                    <div class="rank-name" id="inflated-rank-name">-</div>
-                    <div class="rank-range" id="inflated-rank-range">-</div>
+                    <div class="rank-content">
+                        <div class="rank-image-container">
+                            <img id="inflated-rank-image" class="rank-image" src="" alt="Rank Medal">
+                        </div>
+                        <div class="rank-text">
+                            <div class="rank-name" id="inflated-rank-name">-</div>
+                            <div class="rank-range" id="inflated-rank-range">-</div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
             <div class="note">
-                Note: Players above 5620 MMR in the current system are considered Immortal rank.
+                Note: Players above 5620 MMR in current system or 8500 in inflated system are Immortal rank.
             </div>
         </div>
     </div>
@@ -307,82 +343,90 @@
     </div>
 
     <script>
-        // Current MMR data
+        // Convert number to Roman numeral
+        function toRoman(num) {
+            const romanNumerals = [
+                '', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'
+            ];
+            return romanNumerals[num] || num;
+        }
+
+        // Current MMR data (with Roman numerals)
         const currentRanks = [
-            { name: "Herald 1", min: 1, max: 154 },
-            { name: "Herald 2", min: 154, max: 308 },
-            { name: "Herald 3", min: 308, max: 462 },
-            { name: "Herald 4", min: 462, max: 616 },
-            { name: "Herald 5", min: 616, max: 769 },
-            { name: "Guardian 1", min: 770, max: 924 },
-            { name: "Guardian 2", min: 924, max: 1078 },
-            { name: "Guardian 3", min: 1078, max: 1232 },
-            { name: "Guardian 4", min: 1232, max: 1386 },
-            { name: "Guardian 5", min: 1386, max: 1540 },
-            { name: "Crusader 1", min: 1540, max: 1694 },
-            { name: "Crusader 2", min: 1694, max: 1848 },
-            { name: "Crusader 3", min: 1848, max: 2002 },
-            { name: "Crusader 4", min: 2002, max: 2156 },
-            { name: "Crusader 5", min: 2156, max: 2310 },
-            { name: "Archon 1", min: 2310, max: 2464 },
-            { name: "Archon 2", min: 2464, max: 2618 },
-            { name: "Archon 3", min: 2618, max: 2772 },
-            { name: "Archon 4", min: 2772, max: 2926 },
-            { name: "Archon 5", min: 2926, max: 3080 },
-            { name: "Legend 1", min: 3080, max: 3234 },
-            { name: "Legend 2", min: 3234, max: 3388 },
-            { name: "Legend 3", min: 3388, max: 3542 },
-            { name: "Legend 4", min: 3542, max: 3696 },
-            { name: "Legend 5", min: 3696, max: 3850 },
-            { name: "Ancient 1", min: 3850, max: 4004 },
-            { name: "Ancient 2", min: 4004, max: 4158 },
-            { name: "Ancient 3", min: 4158, max: 4312 },
-            { name: "Ancient 4", min: 4312, max: 4466 },
-            { name: "Ancient 5", min: 4466, max: 4620 },
-            { name: "Divine 1", min: 4620, max: 4820 },
-            { name: "Divine 2", min: 4820, max: 5020 },
-            { name: "Divine 3", min: 5020, max: 5220 },
-            { name: "Divine 4", min: 5220, max: 5420 },
-            { name: "Divine 5", min: 5420, max: 5620 }
+            { name: "Herald", level: 1, min: 1, max: 154 },
+            { name: "Herald", level: 2, min: 154, max: 308 },
+            { name: "Herald", level: 3, min: 308, max: 462 },
+            { name: "Herald", level: 4, min: 462, max: 616 },
+            { name: "Herald", level: 5, min: 616, max: 769 },
+            { name: "Guardian", level: 1, min: 770, max: 924 },
+            { name: "Guardian", level: 2, min: 924, max: 1078 },
+            { name: "Guardian", level: 3, min: 1078, max: 1232 },
+            { name: "Guardian", level: 4, min: 1232, max: 1386 },
+            { name: "Guardian", level: 5, min: 1386, max: 1540 },
+            { name: "Crusader", level: 1, min: 1540, max: 1694 },
+            { name: "Crusader", level: 2, min: 1694, max: 1848 },
+            { name: "Crusader", level: 3, min: 1848, max: 2002 },
+            { name: "Crusader", level: 4, min: 2002, max: 2156 },
+            { name: "Crusader", level: 5, min: 2156, max: 2310 },
+            { name: "Archon", level: 1, min: 2310, max: 2464 },
+            { name: "Archon", level: 2, min: 2464, max: 2618 },
+            { name: "Archon", level: 3, min: 2618, max: 2772 },
+            { name: "Archon", level: 4, min: 2772, max: 2926 },
+            { name: "Archon", level: 5, min: 2926, max: 3080 },
+            { name: "Legend", level: 1, min: 3080, max: 3234 },
+            { name: "Legend", level: 2, min: 3234, max: 3388 },
+            { name: "Legend", level: 3, min: 3388, max: 3542 },
+            { name: "Legend", level: 4, min: 3542, max: 3696 },
+            { name: "Legend", level: 5, min: 3696, max: 3850 },
+            { name: "Ancient", level: 1, min: 3850, max: 4004 },
+            { name: "Ancient", level: 2, min: 4004, max: 4158 },
+            { name: "Ancient", level: 3, min: 4158, max: 4312 },
+            { name: "Ancient", level: 4, min: 4312, max: 4466 },
+            { name: "Ancient", level: 5, min: 4466, max: 4620 },
+            { name: "Divine", level: 1, min: 4620, max: 4820 },
+            { name: "Divine", level: 2, min: 4820, max: 5020 },
+            { name: "Divine", level: 3, min: 5020, max: 5220 },
+            { name: "Divine", level: 4, min: 5220, max: 5420 },
+            { name: "Divine", level: 5, min: 5420, max: 5620 }
         ];
 
         // Inflated MMR data
         const inflatedRanks = [
-            { name: "Herald I", min: 0, max: 242 },
-            { name: "Herald II", min: 243, max: 485 },
-            { name: "Herald III", min: 486, max: 728 },
-            { name: "Herald IV", min: 729, max: 971 },
-            { name: "Herald V", min: 972, max: 1214 },
-            { name: "Guardian I", min: 1215, max: 1457 },
-            { name: "Guardian II", min: 1458, max: 1700 },
-            { name: "Guardian III", min: 1701, max: 1943 },
-            { name: "Guardian IV", min: 1944, max: 2186 },
-            { name: "Guardian V", min: 2187, max: 2429 },
-            { name: "Crusader I", min: 2430, max: 2672 },
-            { name: "Crusader II", min: 2673, max: 2915 },
-            { name: "Crusader III", min: 2916, max: 3158 },
-            { name: "Crusader IV", min: 3159, max: 3401 },
-            { name: "Crusader V", min: 3402, max: 3644 },
-            { name: "Archon I", min: 3645, max: 3887 },
-            { name: "Archon II", min: 3888, max: 4130 },
-            { name: "Archon III", min: 4131, max: 4373 },
-            { name: "Archon IV", min: 4374, max: 4616 },
-            { name: "Archon V", min: 4617, max: 4859 },
-            { name: "Legend I", min: 4860, max: 5102 },
-            { name: "Legend II", min: 5103, max: 5345 },
-            { name: "Legend III", min: 5346, max: 5588 },
-            { name: "Legend IV", min: 5589, max: 5831 },
-            { name: "Legend V", min: 5832, max: 6074 },
-            { name: "Ancient I", min: 6075, max: 6317 },
-            { name: "Ancient II", min: 6318, max: 6560 },
-            { name: "Ancient III", min: 6561, max: 6803 },
-            { name: "Ancient IV", min: 6804, max: 7046 },
-            { name: "Ancient V", min: 7047, max: 7289 },
-            { name: "Divine I", min: 7290, max: 7532 },
-            { name: "Divine II", min: 7533, max: 7775 },
-            { name: "Divine III", min: 7776, max: 8018 },
-            { name: "Divine IV", min: 8019, max: 8261 },
-            { name: "Divine V", min: 8262, max: 8500 }
+            { name: "Herald", level: 1, min: 0, max: 242 },
+            { name: "Herald", level: 2, min: 243, max: 485 },
+            { name: "Herald", level: 3, min: 486, max: 728 },
+            { name: "Herald", level: 4, min: 729, max: 971 },
+            { name: "Herald", level: 5, min: 972, max: 1214 },
+            { name: "Guardian", level: 1, min: 1215, max: 1457 },
+            { name: "Guardian", level: 2, min: 1458, max: 1700 },
+            { name: "Guardian", level: 3, min: 1701, max: 1943 },
+            { name: "Guardian", level: 4, min: 1944, max: 2186 },
+            { name: "Guardian", level: 5, min: 2187, max: 2429 },
+            { name: "Crusader", level: 1, min: 2430, max: 2672 },
+            { name: "Crusader", level: 2, min: 2673, max: 2915 },
+            { name: "Crusader", level: 3, min: 2916, max: 3158 },
+            { name: "Crusader", level: 4, min: 3159, max: 3401 },
+            { name: "Crusader", level: 5, min: 3402, max: 3644 },
+            { name: "Archon", level: 1, min: 3645, max: 3887 },
+            { name: "Archon", level: 2, min: 3888, max: 4130 },
+            { name: "Archon", level: 3, min: 4131, max: 4373 },
+            { name: "Archon", level: 4, min: 4374, max: 4616 },
+            { name: "Archon", level: 5, min: 4617, max: 4859 },
+            { name: "Legend", level: 1, min: 4860, max: 5102 },
+            { name: "Legend", level: 2, min: 5103, max: 5345 },
+            { name: "Legend", level: 3, min: 5346, max: 5588 },
+            { name: "Legend", level: 4, min: 5589, max: 5831 },
+            { name: "Legend", level: 5, min: 5832, max: 6074 },
+            { name: "Ancient", level: 1, min: 6075, max: 6317 },
+            { name: "Ancient", level: 2, min: 6318, max: 6560 },
+            { name: "Ancient", level: 3, min: 6561, max: 6803 },
+            { name: "Ancient", level: 4, min: 6804, max: 7046 },
+            { name: "Ancient", level: 5, min: 7047, max: 7289 },
+            { name: "Divine", level: 1, min: 7290, max: 7532 },
+            { name: "Divine", level: 2, min: 7533, max: 7775 },
+            { name: "Divine", level: 3, min: 7776, max: 8018 },
+            { name: "Divine", level: 4, min: 8019, max: 8261 },
+            { name: "Divine", level: 5, min: 8262, max: 8500 }
         ];
 
         // Initialize tables when page loads
@@ -397,24 +441,34 @@
             
             ranks.forEach(rank => {
                 const row = document.createElement("tr");
+                const displayName = `${rank.name} ${toRoman(rank.level)}`;
                 row.innerHTML = `
-                    <td>${rank.name}</td>
+                    <td>${displayName}</td>
                     <td>${rank.min}</td>
                     <td>${rank.max}</td>
                 `;
                 tableBody.appendChild(row);
             });
 
-            // Add Immortal row for current MMR table
-            if (tableId === "current-mmr-table") {
-                const immortalRow = document.createElement("tr");
-                immortalRow.innerHTML = `
-                    <td class="immortal">Immortal</td>
-                    <td class="immortal">5621</td>
-                    <td class="immortal">∞</td>
-                `;
-                tableBody.appendChild(immortalRow);
-            }
+            // Add Immortal row
+            const immortalRow = document.createElement("tr");
+            const isCurrent = tableId === "current-mmr-table";
+            const minMMR = isCurrent ? 5621 : 8501;
+            immortalRow.innerHTML = `
+                <td class="immortal">Immortal</td>
+                <td class="immortal">${minMMR}</td>
+                <td class="immortal">∞</td>
+            `;
+            tableBody.appendChild(immortalRow);
+        }
+
+        function getRankImage(rankName, level) {
+            if (rankName === "Immortal") return "medals/Immortal.webp";
+            
+            // Remove any existing Roman numerals
+            const baseName = rankName.replace(/ [IVXLCDM]+$/, '');
+            const imageName = `${baseName} ${level}`;
+            return `medals/${imageName}.webp`;
         }
 
         function calculateRanks() {
@@ -435,18 +489,22 @@
             
             // Find current rank
             let currentRank = "Unranked";
+            let currentLevel = 0;
             let currentRange = "MMR: 0";
-            let isImmortal = false;
+            let isCurrentImmortal = mmr > 5620;
+            let currentImage = "medals/Unranked.webp";
 
-            if (mmr > 5620) {
+            if (isCurrentImmortal) {
                 currentRank = "Immortal";
                 currentRange = "MMR: 5621+";
-                isImmortal = true;
+                currentImage = "medals/Immortal.webp";
             } else {
                 for (const rank of currentRanks) {
                     if (mmr >= rank.min && mmr <= rank.max) {
                         currentRank = rank.name;
+                        currentLevel = rank.level;
                         currentRange = `MMR Range: ${rank.min}-${rank.max}`;
+                        currentImage = getRankImage(rank.name, rank.level);
                         break;
                     }
                 }
@@ -454,23 +512,45 @@
             
             // Find inflated rank
             let inflatedRank = "Unranked";
+            let inflatedLevel = 0;
             let inflatedRange = "MMR: 0";
-            for (const rank of inflatedRanks) {
-                if (mmr >= rank.min && mmr <= rank.max) {
-                    inflatedRank = rank.name;
-                    inflatedRange = `MMR Range: ${rank.min}-${rank.max}`;
-                    break;
+            let isInflatedImmortal = mmr > 8500;
+            let inflatedImage = "medals/Unranked.webp";
+
+            if (isInflatedImmortal) {
+                inflatedRank = "Immortal";
+                inflatedRange = "MMR: 8501+";
+                inflatedImage = "medals/Immortal.webp";
+            } else {
+                for (const rank of inflatedRanks) {
+                    if (mmr >= rank.min && mmr <= rank.max) {
+                        inflatedRank = rank.name;
+                        inflatedLevel = rank.level;
+                        inflatedRange = `MMR Range: ${rank.min}-${rank.max}`;
+                        inflatedImage = getRankImage(rank.name, rank.level);
+                        break;
+                    }
                 }
             }
             
             // Display results
             const currentRankElement = document.getElementById("current-rank-name");
-            currentRankElement.textContent = currentRank;
-            currentRankElement.className = isImmortal ? "rank-name immortal" : "rank-name";
+            const currentDisplayName = isCurrentImmortal ? currentRank : `${currentRank} ${toRoman(currentLevel)}`;
+            currentRankElement.textContent = currentDisplayName;
+            currentRankElement.className = isCurrentImmortal ? "rank-name immortal" : "rank-name";
             
             document.getElementById("current-rank-range").textContent = currentRange;
-            document.getElementById("inflated-rank-name").textContent = inflatedRank;
+            document.getElementById("current-rank-image").src = currentImage;
+            document.getElementById("current-rank-image").alt = currentDisplayName;
+
+            const inflatedRankElement = document.getElementById("inflated-rank-name");
+            const inflatedDisplayName = isInflatedImmortal ? inflatedRank : `${inflatedRank} ${toRoman(inflatedLevel)}`;
+            inflatedRankElement.textContent = inflatedDisplayName;
+            inflatedRankElement.className = isInflatedImmortal ? "rank-name immortal" : "rank-name";
+            
             document.getElementById("inflated-rank-range").textContent = inflatedRange;
+            document.getElementById("inflated-rank-image").src = inflatedImage;
+            document.getElementById("inflated-rank-image").alt = inflatedDisplayName;
             
             // Show results section
             resultsDiv.style.display = "block";
