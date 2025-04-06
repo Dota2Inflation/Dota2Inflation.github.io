@@ -246,6 +246,105 @@
             height: 60px;
         }
         
+        /* New distribution graph styles */
+        .distribution-container {
+            margin-top: 40px;
+            background-color: rgba(15, 25, 35, 0.8);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(205, 179, 115, 0.2);
+        }
+        
+        .distribution-title {
+            color: var(--dota-gold);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            text-align: center;
+        }
+        
+        .distribution-subtitle {
+            color: #a7b8d1;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1rem;
+        }
+        
+        .distribution-graph {
+            margin-top: 20px;
+        }
+        
+        .graph-bar {
+            height: 40px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            border-radius: 4px;
+            overflow: hidden;
+            background-color: rgba(26, 62, 111, 0.2);
+        }
+        
+        .graph-bar-fill {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            padding-left: 15px;
+            color: white;
+            font-weight: bold;
+            transition: width 1s ease-out;
+            background: linear-gradient(90deg, var(--dota-blue), #1f4b8e);
+        }
+        
+        .graph-bar-label {
+            position: absolute;
+            left: 15px;
+            color: white;
+            font-weight: bold;
+            z-index: 1;
+        }
+        
+        .graph-bar-percentage {
+            position: absolute;
+            right: 15px;
+            color: white;
+            font-weight: bold;
+            z-index: 1;
+        }
+        
+        .distribution-table {
+            width: 100%;
+            margin-top: 30px;
+            border-collapse: collapse;
+            background-color: rgba(15, 25, 35, 0.8);
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(205, 179, 115, 0.2);
+        }
+        
+        .distribution-table th {
+            background: linear-gradient(to bottom, var(--dota-blue), #142a4a);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .distribution-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(205, 179, 115, 0.1);
+            color: #e0e0e0;
+        }
+        
+        .distribution-table tr:nth-child(even) {
+            background-color: rgba(26, 62, 111, 0.1);
+        }
+        
+        .distribution-table tr:hover {
+            background-color: rgba(205, 179, 115, 0.1);
+        }
+        
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -342,6 +441,77 @@
         </table>
     </div>
 
+    <!-- New Distribution Graph Section -->
+    <div class="distribution-container">
+        <h2 class="distribution-title">Dota 2 Rank Distribution</h2>
+        <div class="distribution-subtitle">Based on inflated MMR system (Total players: 6,746,059)</div>
+        
+        <div class="distribution-graph" id="distribution-graph">
+            <!-- Filled by JavaScript -->
+        </div>
+        
+        <table class="distribution-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>% of Players</th>
+                    <th>Approx. Players</th>
+                    <th>Inflated MMR Range</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Herald</td>
+                    <td>13.85%</td>
+                    <td>934,000</td>
+                    <td>0 – 1214</td>
+                </tr>
+                <tr>
+                    <td>Guardian</td>
+                    <td>26.15%</td>
+                    <td>1,764,000</td>
+                    <td>1215 – 2429</td>
+                </tr>
+                <tr>
+                    <td>Crusader</td>
+                    <td>25%</td>
+                    <td>1,686,515</td>
+                    <td>2430 – 3644</td>
+                </tr>
+                <tr>
+                    <td>Archon</td>
+                    <td>22%</td>
+                    <td>1,484,133</td>
+                    <td>3645 – 4859</td>
+                </tr>
+                <tr>
+                    <td>Legend</td>
+                    <td>5.3%</td>
+                    <td>357,000</td>
+                    <td>4860 – 6074</td>
+                </tr>
+                <tr>
+                    <td>Ancient</td>
+                    <td>2.2%</td>
+                    <td>148,000</td>
+                    <td>6075 – 7289</td>
+                </tr>
+                <tr>
+                    <td>Divine</td>
+                    <td>1.1%</td>
+                    <td>74,000</td>
+                    <td>7290 – 8400</td>
+                </tr>
+                <tr>
+                    <td class="immortal">Immortal</td>
+                    <td class="immortal">0.5%</td>
+                    <td class="immortal">33,730</td>
+                    <td class="immortal">8500+</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
     <script>
         // Convert number to Roman numeral
         function toRoman(num) {
@@ -429,10 +599,23 @@
             { name: "Divine", level: 5, min: 8262, max: 8500 }
         ];
 
-        // Initialize tables when page loads
+        // Rank distribution data
+        const rankDistribution = [
+            { rank: "Herald", percentage: 13.85, players: 934000, mmrRange: "0 – 1214" },
+            { rank: "Guardian", percentage: 26.15, players: 1764000, mmrRange: "1215 – 2429" },
+            { rank: "Crusader", percentage: 25, players: 1686515, mmrRange: "2430 – 3644" },
+            { rank: "Archon", percentage: 22, players: 1484133, mmrRange: "3645 – 4859" },
+            { rank: "Legend", percentage: 5.3, players: 357000, mmrRange: "4860 – 6074" },
+            { rank: "Ancient", percentage: 2.2, players: 148000, mmrRange: "6075 – 7289" },
+            { rank: "Divine", percentage: 1.1, players: 74000, mmrRange: "7290 – 8400" },
+            { rank: "Immortal", percentage: 0.5, players: 33730, mmrRange: "8500+" }
+        ];
+
+        // Initialize tables and graph when page loads
         window.onload = function() {
             populateTable("current-mmr-table", currentRanks);
             populateTable("inflated-mmr-table", inflatedRanks);
+            createDistributionGraph();
         };
 
         function populateTable(tableId, ranks) {
@@ -460,6 +643,40 @@
                 <td class="immortal">∞</td>
             `;
             tableBody.appendChild(immortalRow);
+        }
+
+        function createDistributionGraph() {
+            const graphContainer = document.getElementById("distribution-graph");
+            graphContainer.innerHTML = "";
+            
+            rankDistribution.forEach(item => {
+                const barContainer = document.createElement("div");
+                barContainer.className = "graph-bar";
+                
+                const barFill = document.createElement("div");
+                barFill.className = "graph-bar-fill";
+                barFill.style.width = `${item.percentage}%`;
+                
+                const barLabel = document.createElement("div");
+                barLabel.className = "graph-bar-label";
+                barLabel.textContent = item.rank;
+                
+                const barPercentage = document.createElement("div");
+                barPercentage.className = "graph-bar-percentage";
+                barPercentage.textContent = `${item.percentage}%`;
+                
+                barFill.appendChild(barLabel);
+                barContainer.appendChild(barFill);
+                barContainer.appendChild(barPercentage);
+                graphContainer.appendChild(barContainer);
+                
+                // Special styling for Immortal
+                if (item.rank === "Immortal") {
+                    barFill.style.background = "linear-gradient(90deg, #ffcc00, #ff9900)";
+                    barLabel.classList.add("immortal");
+                    barPercentage.classList.add("immortal");
+                }
+            });
         }
 
         function getRankImage(rankName, level) {
