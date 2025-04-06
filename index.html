@@ -630,7 +630,7 @@
             { name: "Divine", level: 2, min: 7533, max: 7775 },
             { name: "Divine", level: 3, min: 7776, max: 8018 },
             { name: "Divine", level: 4, min: 8019, max: 8261 },
-            { name: "Divine", level: 5, min: 8262, max: 8499 }
+            { name: "Divine", level: 5, min: 8262, max: 8500 }
         ];
 
         // Rank distribution data
@@ -641,7 +641,7 @@
             { rank: "Archon", percentage: 22, players: 1484133, mmrRange: "3645 – 4859", level: 1 },
             { rank: "Legend", percentage: 5.3, players: 357000, mmrRange: "4860 – 6074", level: 1 },
             { rank: "Ancient", percentage: 2.2, players: 148000, mmrRange: "6075 – 7289", level: 1 },
-            { rank: "Divine", percentage: 1.1, players: 74000, mmrRange: "7290 – 8499", level: 1 },
+            { rank: "Divine", percentage: 1.1, players: 74000, mmrRange: "7290 – 8400", level: 1 },
             { rank: "Immortal", percentage: 0.5, players: 33730, mmrRange: "8500+", level: 0 }
         ];
 
@@ -670,7 +670,7 @@
             // Add Immortal row
             const immortalRow = document.createElement("tr");
             const isCurrent = tableId === "current-mmr-table";
-            const minMMR = isCurrent ? 5621 : 8500;
+            const minMMR = isCurrent ? 5621 : 8501;
             immortalRow.innerHTML = `
                 <td class="immortal">Immortal</td>
                 <td class="immortal">${minMMR}</td>
@@ -752,7 +752,7 @@
             let currentRank = "Unranked";
             let currentLevel = 0;
             let currentRange = "MMR: 0";
-            let isCurrentImmortal = mmr > 5621;
+            let isCurrentImmortal = mmr > 5620;
             let currentImage = "medals/Unranked.webp";
 
             if (isCurrentImmortal) {
@@ -780,7 +780,7 @@
 
             if (isInflatedImmortal) {
                 inflatedRank = "Immortal";
-                inflatedRange = "MMR: 8500+";
+                inflatedRange = "MMR: 8501+";
                 inflatedImage = "medals/Immortal.webp";
             } else {
                 for (const rank of inflatedRanks) {
