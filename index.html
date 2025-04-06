@@ -379,6 +379,83 @@
             background-color: rgba(205, 179, 115, 0.1);
         }
         
+        /* Progress graph styles */
+        .progress-container {
+            margin-top: 40px;
+            background-color: rgba(15, 25, 35, 0.8);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(205, 179, 115, 0.2);
+        }
+        
+        .progress-title {
+            color: var(--dota-gold);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            text-align: center;
+        }
+        
+        .progress-graph-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .progress-graph {
+            flex: 1;
+            padding: 20px;
+            border-radius: 6px;
+            background: rgba(26, 62, 111, 0.2);
+            border: 1px solid var(--dota-blue);
+        }
+        
+        .progress-graph-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--dota-gold);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .progress-bar {
+            height: 30px;
+            background-color: rgba(26, 62, 111, 0.5);
+            border-radius: 15px;
+            margin: 20px 0;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--dota-blue), #1f4b8e);
+            border-radius: 15px;
+            transition: width 0.5s ease-out;
+            position: relative;
+        }
+        
+        .progress-bar-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+        }
+        
+        .progress-info {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #a7b8d1;
+            text-align: center;
+        }
+        
+        .progress-info strong {
+            color: var(--dota-gold);
+        }
+        
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -441,6 +518,37 @@
             
             <div class="note">
                 Note: Players above 5620 MMR in current system or 8500 in inflated system are Immortal rank.
+            </div>
+            
+            <!-- Progress to next rank section -->
+            <div class="progress-container">
+                <h2 class="progress-title">Progress to Next Rank</h2>
+                
+                <div class="progress-graph-container">
+                    <div class="progress-graph">
+                        <div class="progress-graph-title">Current System</div>
+                        <div class="progress-bar">
+                            <div id="current-progress-bar" class="progress-bar-fill" style="width: 0%">
+                                <div class="progress-bar-text">0%</div>
+                            </div>
+                        </div>
+                        <div id="current-progress-info" class="progress-info">
+                            Enter your MMR to see progress to next rank
+                        </div>
+                    </div>
+                    
+                    <div class="progress-graph">
+                        <div class="progress-graph-title">Inflated System</div>
+                        <div class="progress-bar">
+                            <div id="inflated-progress-bar" class="progress-bar-fill" style="width: 0%">
+                                <div class="progress-bar-text">0%</div>
+                            </div>
+                        </div>
+                        <div id="inflated-progress-info" class="progress-info">
+                            Enter your MMR to see progress to next rank
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -754,6 +862,9 @@
             let currentRange = "MMR: 0";
             let isCurrentImmortal = mmr > 5620;
             let currentImage = "medals/Unranked.webp";
+            let currentProgress = 0;
+            let currentProgressText = "You are at the highest rank (Immortal)";
+            let currentNextRank = "";
 
             if (isCurrentImmortal) {
                 currentRank = "Immortal";
@@ -766,6 +877,28 @@
                         currentLevel = rank.level;
                         currentRange = `MMR Range: ${rank.min}-${rank.max}`;
                         currentImage = getRankImage(rank.name, rank.level);
+                        
+                        // Calculate progress to next rank
+                        const currentRangeWidth = rank.max - rank.min;
+                        const currentPosition = mmr - rank.min;
+                        currentProgress = (currentPosition / currentRangeWidth) * 100;
+                        
+                        // Find next rank
+                        const currentRankIndex = currentRanks.findIndex(r => 
+                            r.name === rank.name && r.level === rank.level);
+                        
+                        if (currentRankIndex < currentRanks.length - 1) {
+                            const nextRank = currentRanks[currentRankIndex + 1];
+                            currentNextRank = `${nextRank.name} ${toRoman(nextRank.level)}`;
+                            const mmrNeeded = nextRank.min - mmr;
+                            currentProgressText = `${Math.round(currentProgress)}% to ${currentNextRank} (${mmrNeeded} MMR needed)`;
+                        } else if (rank.name === "Divine" && rank.level === 5) {
+                            currentNextRank = "Immortal";
+                            const mmrNeeded = 5621 - mmr;
+                            currentProgressText = `${Math.round(currentProgress)}% to Immortal (${mmrNeeded} MMR needed)`;
+                        } else {
+                            currentProgressText = "You are at the highest rank for this tier";
+                        }
                         break;
                     }
                 }
@@ -777,6 +910,9 @@
             let inflatedRange = "MMR: 0";
             let isInflatedImmortal = mmr > 8500;
             let inflatedImage = "medals/Unranked.webp";
+            let inflatedProgress = 0;
+            let inflatedProgressText = "You are at the highest rank (Immortal)";
+            let inflatedNextRank = "";
 
             if (isInflatedImmortal) {
                 inflatedRank = "Immortal";
@@ -789,6 +925,28 @@
                         inflatedLevel = rank.level;
                         inflatedRange = `MMR Range: ${rank.min}-${rank.max}`;
                         inflatedImage = getRankImage(rank.name, rank.level);
+                        
+                        // Calculate progress to next rank
+                        const inflatedRangeWidth = rank.max - rank.min;
+                        const inflatedPosition = mmr - rank.min;
+                        inflatedProgress = (inflatedPosition / inflatedRangeWidth) * 100;
+                        
+                        // Find next rank
+                        const inflatedRankIndex = inflatedRanks.findIndex(r => 
+                            r.name === rank.name && r.level === rank.level);
+                        
+                        if (inflatedRankIndex < inflatedRanks.length - 1) {
+                            const nextRank = inflatedRanks[inflatedRankIndex + 1];
+                            inflatedNextRank = `${nextRank.name} ${toRoman(nextRank.level)}`;
+                            const mmrNeeded = nextRank.min - mmr;
+                            inflatedProgressText = `${Math.round(inflatedProgress)}% to ${inflatedNextRank} (${mmrNeeded} MMR needed)`;
+                        } else if (rank.name === "Divine" && rank.level === 5) {
+                            inflatedNextRank = "Immortal";
+                            const mmrNeeded = 8501 - mmr;
+                            inflatedProgressText = `${Math.round(inflatedProgress)}% to Immortal (${mmrNeeded} MMR needed)`;
+                        } else {
+                            inflatedProgressText = "You are at the highest rank for this tier";
+                        }
                         break;
                     }
                 }
@@ -812,6 +970,20 @@
             document.getElementById("inflated-rank-range").textContent = inflatedRange;
             document.getElementById("inflated-rank-image").src = inflatedImage;
             document.getElementById("inflated-rank-image").alt = inflatedDisplayName;
+            
+            // Update progress bars
+            const currentProgressBar = document.getElementById("current-progress-bar");
+            const currentProgressTextElement = document.getElementById("current-progress-info");
+            const inflatedProgressBar = document.getElementById("inflated-progress-bar");
+            const inflatedProgressTextElement = document.getElementById("inflated-progress-info");
+            
+            currentProgressBar.style.width = `${currentProgress}%`;
+            currentProgressBar.querySelector('.progress-bar-text').textContent = `${Math.round(currentProgress)}%`;
+            currentProgressTextElement.innerHTML = currentProgressText;
+            
+            inflatedProgressBar.style.width = `${inflatedProgress}%`;
+            inflatedProgressBar.querySelector('.progress-bar-text').textContent = `${Math.round(inflatedProgress)}%`;
+            inflatedProgressTextElement.innerHTML = inflatedProgressText;
             
             // Show results section
             resultsDiv.style.display = "block";
