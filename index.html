@@ -456,6 +456,15 @@
             color: var(--dota-gold);
         }
         
+        .progress-immortal .progress-bar-fill {
+            background: linear-gradient(to right, #ffcc00, #ff9900);
+            width: 100% !important;
+        }
+        
+        .progress-immortal .progress-bar-text {
+            color: #ffcc00;
+        }
+        
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -527,7 +536,7 @@
                 <div class="progress-graph-container">
                     <div class="progress-graph">
                         <div class="progress-graph-title">Current System</div>
-                        <div class="progress-bar">
+                        <div id="current-progress-bar-container" class="progress-bar">
                             <div id="current-progress-bar" class="progress-bar-fill" style="width: 0%">
                                 <div class="progress-bar-text">0%</div>
                             </div>
@@ -539,7 +548,7 @@
                     
                     <div class="progress-graph">
                         <div class="progress-graph-title">Inflated System</div>
-                        <div class="progress-bar">
+                        <div id="inflated-progress-bar-container" class="progress-bar">
                             <div id="inflated-progress-bar" class="progress-bar-fill" style="width: 0%">
                                 <div class="progress-bar-text">0%</div>
                             </div>
@@ -870,6 +879,8 @@
                 currentRank = "Immortal";
                 currentRange = "MMR: 5621+";
                 currentImage = "medals/Immortal.webp";
+                currentProgress = 100;
+                currentProgressText = "You are at the highest rank (Immortal)";
             } else {
                 for (const rank of currentRanks) {
                     if (mmr >= rank.min && mmr <= rank.max) {
@@ -918,6 +929,8 @@
                 inflatedRank = "Immortal";
                 inflatedRange = "MMR: 8501+";
                 inflatedImage = "medals/Immortal.webp";
+                inflatedProgress = 100;
+                inflatedProgressText = "You are at the highest rank (Immortal)";
             } else {
                 for (const rank of inflatedRanks) {
                     if (mmr >= rank.min && mmr <= rank.max) {
@@ -973,17 +986,37 @@
             
             // Update progress bars
             const currentProgressBar = document.getElementById("current-progress-bar");
+            const currentProgressBarContainer = document.getElementById("current-progress-bar-container");
             const currentProgressTextElement = document.getElementById("current-progress-info");
             const inflatedProgressBar = document.getElementById("inflated-progress-bar");
+            const inflatedProgressBarContainer = document.getElementById("inflated-progress-bar-container");
             const inflatedProgressTextElement = document.getElementById("inflated-progress-info");
             
-            currentProgressBar.style.width = `${currentProgress}%`;
-            currentProgressBar.querySelector('.progress-bar-text').textContent = `${Math.round(currentProgress)}%`;
-            currentProgressTextElement.innerHTML = currentProgressText;
+            // Handle current system progress
+            if (isCurrentImmortal) {
+                currentProgressBarContainer.classList.add("progress-immortal");
+                currentProgressBar.style.width = "100%";
+                currentProgressBar.querySelector('.progress-bar-text').textContent = "100%";
+                currentProgressTextElement.innerHTML = "You are at the highest rank (Immortal)";
+            } else {
+                currentProgressBarContainer.classList.remove("progress-immortal");
+                currentProgressBar.style.width = `${currentProgress}%`;
+                currentProgressBar.querySelector('.progress-bar-text').textContent = `${Math.round(currentProgress)}%`;
+                currentProgressTextElement.innerHTML = currentProgressText;
+            }
             
-            inflatedProgressBar.style.width = `${inflatedProgress}%`;
-            inflatedProgressBar.querySelector('.progress-bar-text').textContent = `${Math.round(inflatedProgress)}%`;
-            inflatedProgressTextElement.innerHTML = inflatedProgressText;
+            // Handle inflated system progress
+            if (isInflatedImmortal) {
+                inflatedProgressBarContainer.classList.add("progress-immortal");
+                inflatedProgressBar.style.width = "100%";
+                inflatedProgressBar.querySelector('.progress-bar-text').textContent = "100%";
+                inflatedProgressTextElement.innerHTML = "You are at the highest rank (Immortal)";
+            } else {
+                inflatedProgressBarContainer.classList.remove("progress-immortal");
+                inflatedProgressBar.style.width = `${inflatedProgress}%`;
+                inflatedProgressBar.querySelector('.progress-bar-text').textContent = `${Math.round(inflatedProgress)}%`;
+                inflatedProgressTextElement.innerHTML = inflatedProgressText;
+            }
             
             // Show results section
             resultsDiv.style.display = "block";
