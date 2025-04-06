@@ -670,7 +670,7 @@
             // Add Immortal row
             const immortalRow = document.createElement("tr");
             const isCurrent = tableId === "current-mmr-table";
-            const minMMR = isCurrent ? 5621 : 8501;
+            const minMMR = isCurrent ? 5621 : 8500;
             immortalRow.innerHTML = `
                 <td class="immortal">Immortal</td>
                 <td class="immortal">${minMMR}</td>
@@ -752,7 +752,7 @@
             let currentRank = "Unranked";
             let currentLevel = 0;
             let currentRange = "MMR: 0";
-            let isCurrentImmortal = mmr > 5620;
+            let isCurrentImmortal = mmr > 5621;
             let currentImage = "medals/Unranked.webp";
 
             if (isCurrentImmortal) {
@@ -780,7 +780,7 @@
 
             if (isInflatedImmortal) {
                 inflatedRank = "Immortal";
-                inflatedRange = "MMR: 8501+";
+                inflatedRange = "MMR: 8500+";
                 inflatedImage = "medals/Immortal.webp";
             } else {
                 for (const rank of inflatedRanks) {
